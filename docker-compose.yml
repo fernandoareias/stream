@@ -1,0 +1,162 @@
+version: "3.9"
+
+networks:
+  kafka_network:
+    driver: bridge
+
+services:
+  python_script:
+    build:
+      context: ./apps/ms_proposals
+    container_name: python_insert_data
+    image: python_insert_data:latest
+    volumes:
+      - ./infrastructure/oracle:/opt/oracle/oradata
+    depends_on:
+      - postgres    
+    networks:
+      - kafka_network 
+
+  postgres:
+    image: postgres:13
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_DB: "credit"
+    volumes:
+      - ./infrastructure/postgres:/docker-entrypoint-initdb.d
+      - ./infrastructure/postgres/data:/var/lib/postgresql/data
+    networks:
+      - kafka_network
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    ports:
+      - "9080:8080"
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAP_SERVERS=kafka1:9092,kafka2:9092,kafka3:9092
+      - KAFKA_CLUSTERS_0_SCHEMA_REGISTRY=http://schema-registry:8081
+    depends_on:
+      - kafka1
+      - kafka2
+      - kafka3
+    networks:
+      - kafka_network
+
+  kafka1:
+    image: 'bitnami/kafka:latest'
+    platform: linux/amd64
+    ports:
+      - 19090:19090
+    environment:
+      - KAFKA_ENABLE_KRAFT=yes
+      - KAFKA_CFG_NODE_ID=1
+      - KAFKA_CFG_BROKER_ID=1
+      - KAFKA_KRAFT_CLUSTER_ID=vrCaRnqWS66JNWVQrv7aEg
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=INTERNAL
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      - KAFKA_CFG_LISTENERS=INTERNAL://:9092,EXTERNAL://:19090,CONTROLLER://:9094
+      - KAFKA_CFG_ADVERTISED_LISTENERS=INTERNAL://kafka1:9092,EXTERNAL://127.0.0.1:19090
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka1:9094,2@kafka2:9094,3@kafka3:9094
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    volumes:
+      - ./infrastructure/kafka1:/bitnami/kafka
+    networks:
+      - kafka_network
+
+  kafka2:
+    image: 'bitnami/kafka:latest'
+    platform: linux/amd64
+    ports:
+      - 19091:19091
+    environment:
+      - KAFKA_ENABLE_KRAFT=yes
+      - KAFKA_CFG_NODE_ID=2
+      - KAFKA_CFG_BROKER_ID=2
+      - KAFKA_KRAFT_CLUSTER_ID=vrCaRnqWS66JNWVQrv7aEg
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=INTERNAL
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      - KAFKA_CFG_LISTENERS=INTERNAL://:9092,EXTERNAL://:19091,CONTROLLER://:9094
+      - KAFKA_CFG_ADVERTISED_LISTENERS=INTERNAL://kafka2:9092,EXTERNAL://127.0.0.1:19091
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka1:9094,2@kafka2:9094,3@kafka3:9094
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    volumes:
+      - ./infrastructure/kafka2:/bitnami/kafka
+    networks:
+      - kafka_network
+
+  kafka3:
+    image: 'bitnami/kafka:latest'
+    platform: linux/amd64
+    ports:
+      - 19092:19092
+    environment:
+      - KAFKA_ENABLE_KRAFT=yes
+      - KAFKA_CFG_NODE_ID=3
+      - KAFKA_CFG_BROKER_ID=3
+      - KAFKA_KRAFT_CLUSTER_ID=vrCaRnqWS66JNWVQrv7aEg
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=INTERNAL
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      - KAFKA_CFG_LISTENERS=INTERNAL://:9092,EXTERNAL://:19092,CONTROLLER://:9094
+      - KAFKA_CFG_ADVERTISED_LISTENERS=INTERNAL://kafka3:9092,EXTERNAL://127.0.0.1:19092
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka1:9094,2@kafka2:9094,3@kafka3:9094
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    volumes:
+      - ./infrastructure/kafka3:/bitnami/kafka
+    networks:
+      - kafka_network
+
+  schema-registry:
+    image: confluentinc/cp-schema-registry:latest
+    platform: linux/amd64
+    ports:
+      - 8081:8081
+    environment:
+      - SCHEMA_REGISTRY_HOST_NAME=schema-registry
+      - SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS=PLAINTEXT://kafka1:9092
+      - SCHEMA_REGISTRY_LISTENERS=http://0.0.0.0:8081
+    depends_on:
+      - kafka1
+      - kafka2
+      - kafka3
+    networks:
+      - kafka_network
+
+  connect:
+    image: "debezium/connect:3.0.0.Final"
+    environment:
+      GROUP_ID: "1"
+      REST_ADVERTISED_HOST_NAME: "connect"
+      BOOTSTRAP_SERVERS: "host.docker.internal:9092"
+      CONFIG_STORAGE_TOPIC: "my_connect_configs"
+      OFFSET_STORAGE_TOPIC: "my_connect_offsets"
+      STATUS_STORAGE_TOPIC: "my_connect_statuses"
+      CONNECT_PLUGIN_PATH: "/kafka/plugins"
+      CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_INTERNAL_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_INTERNAL_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+    ports:
+      - "8083:8083"
+    container_name: "connect"
+    volumes:
+      - ./infrastructure/kafka/connect:/kafka/connect 
+    networks:
+      - kafka_network
+
+
+volumes:
+  kafkadata1:
+  kafkadata2:
+  kafkadata3:

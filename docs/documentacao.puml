@@ -1,0 +1,43 @@
+@startuml
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+
+Person(proponent, "Proponent", "Credit card proponent")
+
+Container_Boundary(c1, "Sistema de crédito") {
+
+    Container(ms_proposal, "Microservice Proposal", "Python", "Receive proposal request")
+    ContainerDb(db, "Oracle Database", "Oracle", "Armazena as tabelas de origem (Proposal e Credit Card)", $sprite="oracle")
+
+    Container(debezium, "Debezium Connector", "Kafka Connect + Debezium", "Captura mudanças do Oracle e as envia para os tópicos Kafka")
+    Container(kafka, "Apache Kafka", "Kafka", "Sistema de mensagens para transporte de eventos")
+
+
+    Component(topic_proposal, "proposal-created-event", "Kafka Topic", "Armazena eventos de propostas criadas")
+    Component(topic_credit_card, "credit-card-created-event", "Kafka Topic", "Armazena eventos de cartões de crédito criados")
+    Component(topic_client_created, "client-created-event", "Kafka Topic", "Armazena eventos de clientes criados (resultado do join)")
+    Component(topic_client_private_created, "client-private-created-event", "Kafka Topic", "Armazena eventos de clientes do produto private criados")
+    Component(topic_client_consignado_created, "client-consignado-created-event", "Kafka Topic", "Armazena eventos de clientes do produto consignado criados")
+
+    Container(kafka_streams, "Kafka Streams App", "Java Application", "Consome e realiza join dos tópicos para gerar novos eventos")
+    Container(client_stream, "Client Stream By Product", "Java Application", "Consome e realiza a separacao do cliente para o topico de acordo com o produto selecionado.")
+}
+
+Rel(proponent, ms_proposal, "Envia a proposta de crédito", "Cliente")
+Rel(ms_proposal, db, "Armazenar proposta", "API")
+Rel(debezium, db, "Consome os eventos do banco", "JDBC")
+Rel(debezium, kafka, "Produz eventos de proposal created")
+Rel(debezium, kafka, "Produz eventos de credit card created")
+
+Rel(kafka, topic_proposal, "Alimenta o tópico da proposta de crédito")
+Rel(kafka, topic_credit_card, "Alimenta o tópico do cartão de crédito")
+
+Rel(kafka_streams, topic_proposal, "Consome")
+Rel(kafka_streams, topic_credit_card, "Consome")
+
+Rel(kafka_streams, topic_client_created, "Produz eventos de Cliente Criado")
+Rel(client_stream, topic_client_created, "Consome os eventos de cliente criado")
+
+Rel(client_stream, topic_client_private_created, "Produz o evento de client private created")
+Rel(client_stream, topic_client_consignado_created, "Produz o evento de client consignado created")
+@enduml

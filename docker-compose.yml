@@ -25,12 +25,18 @@ services:
     environment:
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: "postgres"
-      POSTGRES_DB: "credit"
+      POSTGRES_DB: "credit" 
+      POSTGRES_HOST_AUTH_METHOD: "trust"
     volumes:
       - ./infrastructure/postgres:/docker-entrypoint-initdb.d
       - ./infrastructure/postgres/data:/var/lib/postgresql/data
     networks:
       - kafka_network
+    command: >
+      postgres -c wal_level=logical
+               -c max_replication_slots=5
+               -c max_wal_senders=5
+               -c max_connections=100
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
@@ -134,26 +140,33 @@ services:
       - kafka_network
 
   connect:
-    image: "debezium/connect:3.0.0.Final"
+    image: debezium/connect:3.0.0.Final
+    container_name: connect
+    ports:
+      - "8083:8083"
     environment:
+      BOOTSTRAP_SERVERS: "kafka1:9092,kafka2:9092,kafka3:9092"
       GROUP_ID: "1"
-      REST_ADVERTISED_HOST_NAME: "connect"
-      BOOTSTRAP_SERVERS: "host.docker.internal:9092"
       CONFIG_STORAGE_TOPIC: "my_connect_configs"
       OFFSET_STORAGE_TOPIC: "my_connect_offsets"
       STATUS_STORAGE_TOPIC: "my_connect_statuses"
-      CONNECT_PLUGIN_PATH: "/kafka/plugins"
       CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
       CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
       CONNECT_INTERNAL_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
       CONNECT_INTERNAL_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
-    ports:
-      - "8083:8083"
-    container_name: "connect"
-    volumes:
-      - ./infrastructure/kafka/connect:/kafka/connect 
+      CONNECT_PLUGIN_PATH: "/kafka/connect"
+      CONNECT_REST_ADVERTISED_HOST_NAME: "connect"
+      CONNECT_DATABASE_HISTORY: "io.debezium.relational.history.KafkaDatabaseHistory"
+      CONNECT_DATABASE_HISTORY_KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
+      CONNECT_DATABASE_HISTORY_KAFKA_TOPIC: "dbhistory.credit"
+    depends_on:
+      - kafka1
+      - kafka2
+      - kafka3
+      - postgres
     networks:
       - kafka_network
+
 
 
 volumes:

@@ -1,0 +1,26 @@
+{
+  "type": "record",
+  "name": "ProposalCreatedEvent",
+  "fields": [
+    {
+      "name": "key",
+      "type": "string"
+    },
+    {
+      "name": "proposalnumber",
+      "type": "string"
+    },
+    {
+      "name": "proponentdocument",
+      "type": "string"
+    },
+    {
+      "name": "product",
+      "type": "string"
+    },
+    {
+      "name": "status",
+      "type": "string"
+    }
+  ]
+}

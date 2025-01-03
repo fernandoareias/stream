@@ -1,0 +1,34 @@
+{
+  "type": "record",
+  "name": "CreditCardCreatedEvent",
+  "fields": [
+    {
+      "name": "key",
+      "type": "string"
+    },
+    {
+      "name": "cardnumber",
+      "type": "string"
+    },
+    {
+      "name": "portadordocument",
+      "type": "string"
+    },
+    {
+      "name": "status",
+      "type": "string"
+    },
+    {
+      "name": "__deleted",
+      "type": "boolean"
+    },
+    {
+      "name": "__op",
+      "type": "string"
+    },
+    {
+      "name": "__ts_ms",
+      "type": "long"
+    }
+  ]
+}

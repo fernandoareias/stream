@@ -17,18 +17,6 @@
     {
       "name": "status",
       "type": "string"
-    },
-    {
-      "name": "__deleted",
-      "type": "boolean"
-    },
-    {
-      "name": "__op",
-      "type": "string"
-    },
-    {
-      "name": "__ts_ms",
-      "type": "long"
     }
   ]
 }

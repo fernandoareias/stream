@@ -1,7 +1,6 @@
 package com.fernando.jobs;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fernando.events.CDCProposalEvent;
 import com.fernando.events.ProposalCreatedEvent;
 import com.fernando.jobs.common.Job;
@@ -23,19 +22,20 @@ import org.springframework.kafka.support.serializer.JsonSerde;
 import java.util.HashMap;
 import java.util.Map;
 
-public class StreamingEventosIniciaisJob  extends Job {
+
+public class StreamingPropostaCriadaEventJob extends Job {
 
     private static final String bootstrapServers = "localhost:19091";
-    protected static final Logger logger = LoggerFactory.getLogger(StreamingEventosIniciaisJob.class);
+    protected static final Logger logger = LoggerFactory.getLogger(StreamingPropostaCriadaEventJob.class);
     private static final String topic = "proposal-created-event.public.proposal";
     private static final String outputTopic = "proposal-created-event";
     private static final StreamsBuilder builder = new StreamsBuilder();
-    JsonSerde<CDCProposalEvent> cdcProposalEventSerde = new JsonSerde<>(CDCProposalEvent.class);
+    private static final JsonSerde<CDCProposalEvent> cdcProposalEventSerde = new JsonSerde<>(CDCProposalEvent.class);
     private static final SpecificAvroSerde<ProposalCreatedEvent> proposalCreatedEventSpecificAvroSerde = new SpecificAvroSerde<>();
 
     static {
 
-        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "cdc-proposal-stream3");
+        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "cdc-proposal-stream");
 
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
 
@@ -51,9 +51,12 @@ public class StreamingEventosIniciaisJob  extends Job {
         props.put("allow.auto.create.topics", "true");
 
 
+        final Map<String, String> serdeConfig = new HashMap<>();
+        serdeConfig.put("schema.registry.url", "http://localhost:8081");
+        serdeConfig.put("auto.register.schemas", "true");
 
-//        creditCardSerde.configure(serdeConfig, false);
-//        clientCreatedSerde.configure(serdeConfig, false);
+        proposalCreatedEventSpecificAvroSerde.configure(serdeConfig, false);
+        cdcProposalEventSerde.configure(serdeConfig, false);
     }
 
     @Override
@@ -72,7 +75,6 @@ public class StreamingEventosIniciaisJob  extends Job {
                     )
                 )
                 .map((key, value) -> {
-
                         ProposalCreatedEvent avroEvent = new ProposalCreatedEvent(
                                 value.getKey(),
                                 value.getProposalnumber(),

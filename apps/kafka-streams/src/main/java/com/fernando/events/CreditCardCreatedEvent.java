@@ -829,7 +829,7 @@ public class CreditCardCreatedEvent extends org.apache.avro.specific.SpecificRec
 
       /** Creates a new Builder */
       private Builder() {
-        super(SCHEMA$, MODEL$);
+        super(SCHEMA$);
       }
 
       /**
@@ -869,7 +869,7 @@ public class CreditCardCreatedEvent extends org.apache.avro.specific.SpecificRec
        * @param other The existing instance to copy.
        */
       private Builder(ClientCreatedEvent other) {
-        super(SCHEMA$, MODEL$);
+        super(SCHEMA$);
         if (isValidValue(fields()[0], other.key)) {
           this.key = data().deepCopy(fields()[0].schema(), other.key);
           fieldSetFlags()[0] = true;

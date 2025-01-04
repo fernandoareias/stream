@@ -13,9 +13,9 @@ public class Main {
     public static void main(String[] args) {
 
         log.info("Iniciando projeto...");
-        log.info("Job selecionado = 'streaming-cartao-criado-event'");
+        log.info("Job selecionado = {}", args[0]);
 
-        Job job = factory.getJob("streaming-cartao-criado-event");
+        Job job = factory.getJob(args[0]);
 
         if(job == null)
             throw new NullPointerException("Nao foi possivel encontrar o job informado.");

@@ -1,5 +1,5 @@
 {
-  "namespace": "com.fernando",
+  "namespace": "com.fernando.events",
   "type": "record",
   "name": "ClientCreatedEvent",
   "fields": [

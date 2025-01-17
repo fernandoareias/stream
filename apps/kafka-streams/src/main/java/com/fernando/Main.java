@@ -11,11 +11,18 @@ public class Main {
     private final static Logger log = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) {
+        String jobName = System.getenv("JOB_NAME");
+
+        if (jobName == null || jobName.isEmpty()) {
+            log.error("A variável de ambiente JOB_NAME não foi definida!");
+            System.exit(1);
+        }
+
 
         log.info("Iniciando projeto...");
-        log.info("Job selecionado = {}", args[0]);
+        log.info("Job selecionado = {}", jobName);
 
-        Job job = factory.getJob(args[0]);
+        Job job = factory.getJob(jobName);
 
         if(job == null)
             throw new NullPointerException("Nao foi possivel encontrar o job informado.");

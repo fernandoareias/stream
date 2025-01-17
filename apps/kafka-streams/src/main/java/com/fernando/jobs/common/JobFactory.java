@@ -1,6 +1,7 @@
 package com.fernando.jobs.common;
 
 import com.fernando.jobs.StreamingCartaoCriadoEventJob;
+import com.fernando.jobs.StreamingClienteCriadoDividindoPorProdutoJob;
 import com.fernando.jobs.StreamingEventosClienteCriadoJob;
 import com.fernando.jobs.StreamingPropostaCriadaEventJob;
 
@@ -17,6 +18,9 @@ public class JobFactory {
 
         if(Objects.equals(name.trim(), "client-created-event"))
             return new StreamingEventosClienteCriadoJob();
+
+        if(Objects.equals(name.trim(), "client-by-product-event"))
+            return new StreamingClienteCriadoDividindoPorProdutoJob();
 
         return null;
     }

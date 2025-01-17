@@ -25,7 +25,6 @@ import java.util.Map;
 
 public class StreamingCartaoCriadoEventJob extends Job {
 
-    private static final String bootstrapServers = "localhost:19091";
     protected static final Logger logger = LoggerFactory.getLogger(StreamingCartaoCriadoEventJob.class);
     private static final String topic = "credit-card-created-event.public.credit_card";
     private static final String outputTopic = "credit-card-created-event";
@@ -34,6 +33,12 @@ public class StreamingCartaoCriadoEventJob extends Job {
     private static final SpecificAvroSerde<CreditCardCreatedEvent> creditCardCreatedEventSpecificAvroSerde = new SpecificAvroSerde<>();
 
     static {
+        var bootstrapServers = System.getenv("KAFKA_BROKER");
+
+        if (bootstrapServers == null || bootstrapServers.isEmpty()) {
+            logger.error("A variável de ambiente KAFKA_BROKER não foi definida!");
+            System.exit(1);
+        }
 
         props.put(StreamsConfig.APPLICATION_ID_CONFIG, "cdc-credit-card-stream");
 
@@ -50,9 +55,15 @@ public class StreamingCartaoCriadoEventJob extends Job {
         props.put(StreamsConfig.STATE_DIR_CONFIG, "../../infrastructure/stream-state");
         props.put("allow.auto.create.topics", "true");
 
+        var schemaRegistryUrl = System.getenv("SCHEMA_REGISTRY_URL");
+
+        if (schemaRegistryUrl == null || schemaRegistryUrl.isEmpty()) {
+            logger.error("A variável de ambiente SCHEMA_REGISTRY_URL não foi definida!");
+            System.exit(1);
+        }
 
         final Map<String, String> serdeConfig = new HashMap<>();
-        serdeConfig.put("schema.registry.url", "http://localhost:8081");
+        serdeConfig.put("schema.registry.url", schemaRegistryUrl);
         serdeConfig.put("auto.register.schemas", "true");
 
         creditCardCreatedEventSpecificAvroSerde.configure(serdeConfig, false);

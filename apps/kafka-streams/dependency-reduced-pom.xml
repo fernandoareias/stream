@@ -5,6 +5,7 @@
   <artifactId>kafka-streams</artifactId>
   <version>1.0-SNAPSHOT</version>
   <build>
+    <finalName>kafka-stream</finalName>
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>

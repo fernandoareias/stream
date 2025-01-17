@@ -65,12 +65,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.fernando</groupId>
-            <artifactId>core</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka-clients</artifactId>
             <version>3.7.1</version>
@@ -85,6 +79,7 @@
     </dependencies>
 
     <build>
+        <finalName>kafka-stream</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

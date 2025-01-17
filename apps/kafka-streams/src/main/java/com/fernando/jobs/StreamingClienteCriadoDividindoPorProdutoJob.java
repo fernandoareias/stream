@@ -1,8 +1,6 @@
 package com.fernando.jobs;
 
-
-import com.fernando.events.CDCProposalEvent;
-import com.fernando.events.ProposalCreatedEvent;
+import com.fernando.events.*;
 import com.fernando.jobs.common.Job;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -22,20 +20,20 @@ import org.springframework.kafka.support.serializer.JsonSerde;
 import java.util.HashMap;
 import java.util.Map;
 
+public class StreamingClienteCriadoDividindoPorProdutoJob  extends Job {
 
-public class StreamingPropostaCriadaEventJob extends Job {
+    protected static final Logger logger = LoggerFactory.getLogger(StreamingClienteCriadoDividindoPorProdutoJob.class);
+    private static final String topic = "client-created-event";
 
-    protected static final Logger logger = LoggerFactory.getLogger(StreamingPropostaCriadaEventJob.class);
-    private static final String topic = "proposal-created-event.public.proposal";
-    private static final String outputTopic = "proposal-created-event";
-    private static final StreamsBuilder builder = new StreamsBuilder();
-    private static final JsonSerde<CDCProposalEvent> cdcProposalEventSerde = new JsonSerde<>(CDCProposalEvent.class);
-    private static final SpecificAvroSerde<ProposalCreatedEvent> proposalCreatedEventSpecificAvroSerde = new SpecificAvroSerde<>();
+    private static final SpecificAvroSerde<ClientCreatedEvent> clientCreatedEventSpecificAvroSerde = new SpecificAvroSerde<>();
+
+    private static final Map<String, String> outputTopic = new HashMap<>(){{
+        put("consignado", "event-new-client-consignado");
+        put("private", "event-new-client-private");
+    }};
+
 
     static {
-
-        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "cdc-proposal-stream");
-
         var bootstrapServers = System.getenv("KAFKA_BROKER");
 
         if (bootstrapServers == null || bootstrapServers.isEmpty()) {
@@ -43,17 +41,21 @@ public class StreamingPropostaCriadaEventJob extends Job {
             System.exit(1);
         }
 
+        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "stream-cliente-pelo-produto");
+
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
 
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+
         props.put(StreamsConfig.DEFAULT_DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG,
                 LogAndFailExceptionHandler.class);
+
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
 
-        props.put(StreamsConfig.STATE_DIR_CONFIG, "/app/kafka-stream-state");
+        props.put(StreamsConfig.STATE_DIR_CONFIG, "../../infrastructure/stream-state");
         props.put("allow.auto.create.topics", "true");
 
         var schemaRegistryUrl = System.getenv("SCHEMA_REGISTRY_URL");
@@ -67,41 +69,37 @@ public class StreamingPropostaCriadaEventJob extends Job {
         serdeConfig.put("schema.registry.url", schemaRegistryUrl);
         serdeConfig.put("auto.register.schemas", "true");
 
-        proposalCreatedEventSpecificAvroSerde.configure(serdeConfig, false);
-        cdcProposalEventSerde.configure(serdeConfig, false);
+        clientCreatedEventSpecificAvroSerde.configure(serdeConfig, false);
     }
 
     @Override
     public void startStreaming() {
 
-        KStream<String, CDCProposalEvent> clientCreatedEventKStream = builder.stream(topic,
-                Consumed.with(
-                        Serdes.String(),
-                        cdcProposalEventSerde
-                )
+        StreamsBuilder builder = new StreamsBuilder();
+
+        KStream<String, ClientCreatedEvent> clientCreatedEventKStream = builder.stream(
+                topic, Consumed.with(Serdes.String(), clientCreatedEventSpecificAvroSerde));
+
+        clientCreatedEventKStream.foreach((key, value) -> logger.info("KStream clientCreatedEventKStream Key=" + key + ", Value=" + value));
+
+        KStream<String, ClientCreatedEvent> productAStream = clientCreatedEventKStream.filter(
+                (key, value) -> "consignado".equalsIgnoreCase(value.getProduct().toString())
         );
 
-        clientCreatedEventKStream
-                .peek((key, value) -> logger.info(
-                        String.format("Consuming event proposal by CDC: %s", value)
-                    )
-                )
-                .map((key, value) -> {
-                        ProposalCreatedEvent avroEvent = new ProposalCreatedEvent(
-                                value.getKey(),
-                                value.getProposalnumber(),
-                                value.getProponentdocument(),
-                                value.getProduct(),
-                                value.getStatus()
-                        );
-                        return new KeyValue<>(avroEvent.getProponentdocument().toString(), avroEvent);
+        productAStream.foreach((key, value) -> logger.info("KStream productAStream Key=" + key + ", Value=" + value));
 
-                })
-                .to(outputTopic, Produced.with(Serdes.String(), proposalCreatedEventSpecificAvroSerde));
+        KStream<String, ClientCreatedEvent> productBStream = clientCreatedEventKStream.filter(
+                (key, value) -> "private".equalsIgnoreCase(value.getProduct().toString())
+        );
+
+        productAStream.foreach((key, value) -> logger.info("KStream productBStream Key=" + key + ", Value=" + value));
+
+        productAStream.to(outputTopic.get("consignado"), Produced.with(Serdes.String(), clientCreatedEventSpecificAvroSerde));
+        productBStream.to(outputTopic.get("private"), Produced.with(Serdes.String(), clientCreatedEventSpecificAvroSerde));
 
         KafkaStreams streams = new KafkaStreams(builder.build(), props);
-
         streams.start();
+
         Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
     }
 }

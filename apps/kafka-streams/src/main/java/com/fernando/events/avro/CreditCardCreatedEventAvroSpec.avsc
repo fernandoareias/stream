@@ -1,4 +1,5 @@
 {
+  "namespace": "com.fernando.events",
   "type": "record",
   "name": "CreditCardCreatedEvent",
   "fields": [

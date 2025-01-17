@@ -13,10 +13,10 @@ import org.apache.avro.message.SchemaStore;
 
 @org.apache.avro.specific.AvroGenerated
 public class ClientCreatedEvent extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
-  private static final long serialVersionUID = -3959963720032071188L;
+  private static final long serialVersionUID = 8451434918334044466L;
 
 
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"ClientCreatedEvent\",\"namespace\":\"com.fernando\",\"fields\":[{\"name\":\"key\",\"type\":\"string\"},{\"name\":\"cardNumber\",\"type\":\"string\"},{\"name\":\"proposalNumber\",\"type\":\"string\"},{\"name\":\"document\",\"type\":\"string\"},{\"name\":\"product\",\"type\":\"string\"},{\"name\":\"status\",\"type\":\"string\"}]}");
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"ClientCreatedEvent\",\"namespace\":\"com.fernando.events\",\"fields\":[{\"name\":\"key\",\"type\":\"string\"},{\"name\":\"cardNumber\",\"type\":\"string\"},{\"name\":\"proposalNumber\",\"type\":\"string\"},{\"name\":\"document\",\"type\":\"string\"},{\"name\":\"product\",\"type\":\"string\"},{\"name\":\"status\",\"type\":\"string\"}]}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
 
   private static final SpecificData MODEL$ = new SpecificData();
@@ -245,8 +245,8 @@ public class ClientCreatedEvent extends org.apache.avro.specific.SpecificRecordB
    * Creates a new ClientCreatedEvent RecordBuilder.
    * @return A new ClientCreatedEvent RecordBuilder
    */
-  public static ClientCreatedEvent.Builder newBuilder() {
-    return new ClientCreatedEvent.Builder();
+  public static com.fernando.events.ClientCreatedEvent.Builder newBuilder() {
+    return new com.fernando.events.ClientCreatedEvent.Builder();
   }
 
   /**
@@ -254,11 +254,11 @@ public class ClientCreatedEvent extends org.apache.avro.specific.SpecificRecordB
    * @param other The existing builder to copy.
    * @return A new ClientCreatedEvent RecordBuilder
    */
-  public static ClientCreatedEvent.Builder newBuilder(ClientCreatedEvent.Builder other) {
+  public static com.fernando.events.ClientCreatedEvent.Builder newBuilder(com.fernando.events.ClientCreatedEvent.Builder other) {
     if (other == null) {
-      return new ClientCreatedEvent.Builder();
+      return new com.fernando.events.ClientCreatedEvent.Builder();
     } else {
-      return new ClientCreatedEvent.Builder(other);
+      return new com.fernando.events.ClientCreatedEvent.Builder(other);
     }
   }
 
@@ -267,11 +267,11 @@ public class ClientCreatedEvent extends org.apache.avro.specific.SpecificRecordB
    * @param other The existing instance to copy.
    * @return A new ClientCreatedEvent RecordBuilder
    */
-  public static ClientCreatedEvent.Builder newBuilder(ClientCreatedEvent other) {
+  public static com.fernando.events.ClientCreatedEvent.Builder newBuilder(com.fernando.events.ClientCreatedEvent other) {
     if (other == null) {
-      return new ClientCreatedEvent.Builder();
+      return new com.fernando.events.ClientCreatedEvent.Builder();
     } else {
-      return new ClientCreatedEvent.Builder(other);
+      return new com.fernando.events.ClientCreatedEvent.Builder(other);
     }
   }
 
@@ -298,7 +298,7 @@ public class ClientCreatedEvent extends org.apache.avro.specific.SpecificRecordB
      * Creates a Builder by copying an existing Builder.
      * @param other The existing Builder to copy.
      */
-    private Builder(ClientCreatedEvent.Builder other) {
+    private Builder(com.fernando.events.ClientCreatedEvent.Builder other) {
       super(other);
       if (isValidValue(fields()[0], other.key)) {
         this.key = data().deepCopy(fields()[0].schema(), other.key);
@@ -330,7 +330,7 @@ public class ClientCreatedEvent extends org.apache.avro.specific.SpecificRecordB
      * Creates a Builder by copying an existing ClientCreatedEvent instance
      * @param other The existing instance to copy.
      */
-    private Builder(ClientCreatedEvent other) {
+    private Builder(com.fernando.events.ClientCreatedEvent other) {
       super(SCHEMA$);
       if (isValidValue(fields()[0], other.key)) {
         this.key = data().deepCopy(fields()[0].schema(), other.key);
@@ -372,7 +372,7 @@ public class ClientCreatedEvent extends org.apache.avro.specific.SpecificRecordB
       * @param value The value of 'key'.
       * @return This builder.
       */
-    public ClientCreatedEvent.Builder setKey(java.lang.CharSequence value) {
+    public com.fernando.events.ClientCreatedEvent.Builder setKey(java.lang.CharSequence value) {
       validate(fields()[0], value);
       this.key = value;
       fieldSetFlags()[0] = true;
@@ -392,7 +392,7 @@ public class ClientCreatedEvent extends org.apache.avro.specific.SpecificRecordB
       * Clears the value of the 'key' field.
       * @return This builder.
       */
-    public ClientCreatedEvent.Builder clearKey() {
+    public com.fernando.events.ClientCreatedEvent.Builder clearKey() {
       key = null;
       fieldSetFlags()[0] = false;
       return this;
@@ -412,7 +412,7 @@ public class ClientCreatedEvent extends org.apache.avro.specific.SpecificRecordB
       * @param value The value of 'cardNumber'.
       * @return This builder.
       */
-    public ClientCreatedEvent.Builder setCardNumber(java.lang.CharSequence value) {
+    public com.fernando.events.ClientCreatedEvent.Builder setCardNumber(java.lang.CharSequence value) {
       validate(fields()[1], value);
       this.cardNumber = value;
       fieldSetFlags()[1] = true;
@@ -432,7 +432,7 @@ public class ClientCreatedEvent extends org.apache.avro.specific.SpecificRecordB
       * Clears the value of the 'cardNumber' field.
       * @return This builder.
       */
-    public ClientCreatedEvent.Builder clearCardNumber() {
+    public com.fernando.events.ClientCreatedEvent.Builder clearCardNumber() {
       cardNumber = null;
       fieldSetFlags()[1] = false;
       return this;
@@ -452,7 +452,7 @@ public class ClientCreatedEvent extends org.apache.avro.specific.SpecificRecordB
       * @param value The value of 'proposalNumber'.
       * @return This builder.
       */
-    public ClientCreatedEvent.Builder setProposalNumber(java.lang.CharSequence value) {
+    public com.fernando.events.ClientCreatedEvent.Builder setProposalNumber(java.lang.CharSequence value) {
       validate(fields()[2], value);
       this.proposalNumber = value;
       fieldSetFlags()[2] = true;
@@ -472,7 +472,7 @@ public class ClientCreatedEvent extends org.apache.avro.specific.SpecificRecordB
       * Clears the value of the 'proposalNumber' field.
       * @return This builder.
       */
-    public ClientCreatedEvent.Builder clearProposalNumber() {
+    public com.fernando.events.ClientCreatedEvent.Builder clearProposalNumber() {
       proposalNumber = null;
       fieldSetFlags()[2] = false;
       return this;
@@ -492,7 +492,7 @@ public class ClientCreatedEvent extends org.apache.avro.specific.SpecificRecordB
       * @param value The value of 'document'.
       * @return This builder.
       */
-    public ClientCreatedEvent.Builder setDocument(java.lang.CharSequence value) {
+    public com.fernando.events.ClientCreatedEvent.Builder setDocument(java.lang.CharSequence value) {
       validate(fields()[3], value);
       this.document = value;
       fieldSetFlags()[3] = true;
@@ -512,7 +512,7 @@ public class ClientCreatedEvent extends org.apache.avro.specific.SpecificRecordB
       * Clears the value of the 'document' field.
       * @return This builder.
       */
-    public ClientCreatedEvent.Builder clearDocument() {
+    public com.fernando.events.ClientCreatedEvent.Builder clearDocument() {
       document = null;
       fieldSetFlags()[3] = false;
       return this;
@@ -532,7 +532,7 @@ public class ClientCreatedEvent extends org.apache.avro.specific.SpecificRecordB
       * @param value The value of 'product'.
       * @return This builder.
       */
-    public ClientCreatedEvent.Builder setProduct(java.lang.CharSequence value) {
+    public com.fernando.events.ClientCreatedEvent.Builder setProduct(java.lang.CharSequence value) {
       validate(fields()[4], value);
       this.product = value;
       fieldSetFlags()[4] = true;
@@ -552,7 +552,7 @@ public class ClientCreatedEvent extends org.apache.avro.specific.SpecificRecordB
       * Clears the value of the 'product' field.
       * @return This builder.
       */
-    public ClientCreatedEvent.Builder clearProduct() {
+    public com.fernando.events.ClientCreatedEvent.Builder clearProduct() {
       product = null;
       fieldSetFlags()[4] = false;
       return this;
@@ -572,7 +572,7 @@ public class ClientCreatedEvent extends org.apache.avro.specific.SpecificRecordB
       * @param value The value of 'status'.
       * @return This builder.
       */
-    public ClientCreatedEvent.Builder setStatus(java.lang.CharSequence value) {
+    public com.fernando.events.ClientCreatedEvent.Builder setStatus(java.lang.CharSequence value) {
       validate(fields()[5], value);
       this.status = value;
       fieldSetFlags()[5] = true;
@@ -592,7 +592,7 @@ public class ClientCreatedEvent extends org.apache.avro.specific.SpecificRecordB
       * Clears the value of the 'status' field.
       * @return This builder.
       */
-    public ClientCreatedEvent.Builder clearStatus() {
+    public com.fernando.events.ClientCreatedEvent.Builder clearStatus() {
       status = null;
       fieldSetFlags()[5] = false;
       return this;

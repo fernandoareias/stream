@@ -7,14 +7,19 @@ Person(proponent, "Proponent", "Credit card proponent")
 Container_Boundary(c1, "Sistema de crédito") {
 
     Container(ms_proposal, "Microservice Proposal", "Python", "Receive proposal request")
-    ContainerDb(db, "Oracle Database", "Oracle", "Armazena as tabelas de origem (Proposal e Credit Card)", $sprite="oracle")
+    ContainerDb(db, "Postgres Database", "PostgresSQL", "Armazena as tabelas de origem (Proposal e Credit Card)", $sprite="oracle")
 
-    Container(debezium, "Debezium Connector", "Kafka Connect + Debezium", "Captura mudanças do Oracle e as envia para os tópicos Kafka")
+    Container(debezium, "Debezium Connector", "Kafka Connect + Debezium", "Captura mudanças do Postgres e as envia para os tópicos Kafka")
     Container(kafka, "Apache Kafka", "Kafka", "Sistema de mensagens para transporte de eventos")
 
 
-    Component(topic_proposal, "proposal-created-event", "Kafka Topic", "Armazena eventos de propostas criadas")
-    Component(topic_credit_card, "credit-card-created-event", "Kafka Topic", "Armazena eventos de cartões de crédito criados")
+    Component(cdc_topic_proposal, "proposal-created-event.public.proposal", "Kafka Topic", "Armazena eventos de propostas criados pelo CDC")
+    Component(cdc_topic_credit_card, "credit-card-created-event.public.credit_card", "Kafka Topic", "Armazena eventos de cartões de crédito criados pelo CDC")
+
+    Component(topic_credit_card_created, "credit-card-created-event", "Kafka Topic", "Armazena eventos de cartões de crédito criados")
+    Component(topic_proposal-created, "proposal-created-event", "Kafka Topic", "Armazena eventos de proposta de crédito criados")
+    Component(streaming-cartao-criado-app, "streaming-cartao-criado-app", "Kafka Stream App", "Consome e transforma o evento de cartao criado")
+
     Component(topic_client_created, "client-created-event", "Kafka Topic", "Armazena eventos de clientes criados (resultado do join)")
     Component(topic_client_private_created, "client-private-created-event", "Kafka Topic", "Armazena eventos de clientes do produto private criados")
     Component(topic_client_consignado_created, "client-consignado-created-event", "Kafka Topic", "Armazena eventos de clientes do produto consignado criados")
@@ -26,8 +31,8 @@ Container_Boundary(c1, "Sistema de crédito") {
 Rel(proponent, ms_proposal, "Envia a proposta de crédito", "Cliente")
 Rel(ms_proposal, db, "Armazenar proposta", "API")
 Rel(debezium, db, "Consome os eventos do banco", "JDBC")
-Rel(debezium, kafka, "Produz eventos de proposal created")
-Rel(debezium, kafka, "Produz eventos de credit card created")
+Rel(debezium, kafka, "Produz eventos de 'proposal-created-event.public.proposal'")
+Rel(debezium, kafka, "Produz eventos de 'credit-card-created-event.public.credit_card'")
 
 Rel(kafka, topic_proposal, "Alimenta o tópico da proposta de crédito")
 Rel(kafka, topic_credit_card, "Alimenta o tópico do cartão de crédito")
